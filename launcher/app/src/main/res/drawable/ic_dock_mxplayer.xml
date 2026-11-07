@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="130dp"
+    android:height="85dp"
+    android:viewportWidth="100"
+    android:viewportHeight="64">
+    <!-- Unmistakable bold geometric MX Player logo in pure white -->
+    <!-- 'M' letter -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 16,50 L 16,14 L 25,14 L 34,36 L 43,14 L 52,14 L 52,50 L 44,50 L 44,25 L 36.5,43 L 31.5,43 L 24,25 L 24,50 Z" />
+    <!-- 'X' letter with play triangle slant -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 58,14 L 67,14 L 72,25 L 77,14 L 86,14 L 78,32 L 86,50 L 77,50 L 72,39 L 67,50 L 58,50 L 66,32 Z" />
+    <!-- Sleek play badge triangle accent -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 88,27 L 96,32 L 88,37 Z" />
+</vector>

@@ -341,7 +341,13 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     null, null, null, 0));
         }
         items.clear();
-        items.addAll(fresh);
+        if (dockRow && !reordering) {
+            for (int i = 0; i < Math.min(fresh.size(), dockSize); i++) {
+                items.add(fresh.get(i));
+            }
+        } else {
+            items.addAll(fresh);
+        }
         notifyDataSetChanged();
     }
 
@@ -478,35 +484,38 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         // The dock has no labels, unless always_show_names asks for them (DockDecoration then makes room in the band).
         // In a single row every tile is the dock's kind: the big title above names it.
         boolean dockKind = DockSlots.inDockRow(dockRow, singleRow, position, dockSize);
-        h.name.setVisibility(dockKind && restNameAlpha == 0f ? View.INVISIBLE : View.VISIBLE);
         h.inDock = dockKind;
-        boolean focused = h.card.isFocused();   // a rebind after reload() can hit the focused tile
-        h.name.setAlpha(focused ? 1f : restNameAlpha);
-        h.card.setScaleX(focused && animations ? focusScale() : 1f);
-        h.card.setScaleY(focused && animations ? focusScale() : 1f);
-        h.card.setTranslationY(focused && advancedEffects && !dockKind ? -4f * ctx.getResources().getDisplayMetrics().density : 0f);
-        h.card.setTranslationZ(focused && advancedEffects ? 8f * ctx.getResources().getDisplayMetrics().density : 0f);
-        h.banner.setScaleX(focused && advancedEffects ? 1.035f : 1f);
-        h.banner.setScaleY(focused && advancedEffects ? 1.035f : 1f);
-        // A fully opaque banner covers the whole card (centerCrop), so the card's own fill under it is drawn for
-        // nothing on every frame; keep it under banners with transparent parts and under icon tiles.
-        h.card.setBackground(e.banner != null && e.banner.getOpacity() == PixelFormat.OPAQUE ? null : h.cardBackground);
-        if (uniformTiles && e.banner == null) {
-            if (e.backdrop == null) e.backdrop = backdrop(e.icon, ambientColorAt(position));
-            h.card.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, e.backdrop));
-        }
-        if (e.banner != null) {
-            h.banner.setImageDrawable(e.banner);
+        int dockIcon = getDockDrawable(e.pkg);
+        if (dockKind && dockIcon != 0) {
+            h.card.setBackground(null);
+            h.banner.setImageResource(dockIcon);
+            h.banner.setScaleType(ImageView.ScaleType.FIT_CENTER);
             h.banner.setVisibility(View.VISIBLE);
             h.icon.setVisibility(View.GONE);
             h.label.setVisibility(View.GONE);
+            h.name.setText(getDockLabel(e.pkg, e.name));
+            e.ambient = getDockColor(e.pkg);
         } else {
-            h.banner.setImageDrawable(null);
-            h.banner.setVisibility(View.GONE);
-            h.icon.setImageDrawable(e.icon);
-            h.icon.setVisibility(View.VISIBLE);
-            h.label.setText(e.label);
-            h.label.setVisibility(uniformTiles ? View.GONE : View.VISIBLE);
+            // A fully opaque banner covers the whole card (centerCrop), so the card's own fill under it is drawn for
+            // nothing on every frame; keep it under banners with transparent parts and under icon tiles.
+            h.card.setBackground(e.banner != null && e.banner.getOpacity() == PixelFormat.OPAQUE ? null : h.cardBackground);
+            if (uniformTiles && e.banner == null) {
+                if (e.backdrop == null) e.backdrop = backdrop(e.icon, ambientColorAt(position));
+                h.card.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, e.backdrop));
+            }
+            if (e.banner != null) {
+                h.banner.setImageDrawable(e.banner);
+                h.banner.setVisibility(View.VISIBLE);
+                h.icon.setVisibility(View.GONE);
+                h.label.setVisibility(View.GONE);
+            } else {
+                h.banner.setImageDrawable(null);
+                h.banner.setVisibility(View.GONE);
+                h.icon.setImageDrawable(e.icon);
+                h.icon.setVisibility(View.VISIBLE);
+                h.label.setText(e.label);
+                h.label.setVisibility(uniformTiles ? View.GONE : View.VISIBLE);
+            }
         }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
@@ -894,6 +903,36 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return Color.HSVToColor(hsv);
     }
 
+    static int getDockDrawable(String pkg) {
+        if ("com.netflix.ninja".equals(pkg)) return R.drawable.ic_dock_netflix;
+        if ("com.amazon.amazonvideo.livingroom".equals(pkg)) return R.drawable.ic_dock_prime;
+        if ("in.startv.hotstar".equals(pkg)) return R.drawable.ic_dock_hotstar;
+        if ("com.mxtech.videoplayer.television".equals(pkg) || "com.mxtech.videoplayer.ad".equals(pkg)) return R.drawable.ic_dock_mxplayer;
+        if ("com.google.android.youtube.tv".equals(pkg)) return R.drawable.ic_dock_youtube;
+        if ("com.apple.atve.androidtv.appletv".equals(pkg)) return R.drawable.ic_dock_appletv;
+        return 0;
+    }
+
+    static String getDockLabel(String pkg, String defaultLabel) {
+        if ("com.netflix.ninja".equals(pkg)) return "Netflix";
+        if ("com.amazon.amazonvideo.livingroom".equals(pkg)) return "Prime Video";
+        if ("in.startv.hotstar".equals(pkg)) return "JioHotstar";
+        if ("com.mxtech.videoplayer.television".equals(pkg) || "com.mxtech.videoplayer.ad".equals(pkg)) return "MX Player";
+        if ("com.google.android.youtube.tv".equals(pkg)) return "YouTube";
+        if ("com.apple.atve.androidtv.appletv".equals(pkg)) return "Apple TV";
+        return defaultLabel;
+    }
+
+    static int getDockColor(String pkg) {
+        if ("com.netflix.ninja".equals(pkg)) return 0xFFE50914;
+        if ("com.amazon.amazonvideo.livingroom".equals(pkg)) return 0xFF1F86FF;
+        if ("in.startv.hotstar".equals(pkg)) return 0xFF4F7BFF;
+        if ("com.mxtech.videoplayer.television".equals(pkg) || "com.mxtech.videoplayer.ad".equals(pkg)) return 0xFF0084FF;
+        if ("com.google.android.youtube.tv".equals(pkg)) return 0xFFFF2020;
+        if ("com.apple.atve.androidtv.appletv".equals(pkg)) return 0xFFE0E0E0;
+        return 0;
+    }
+
     /** Corner radius for a tile of this width: 16dp at the design width, proportionally less when smaller. */
     static float cornerRadius(int tileWidthPx, float density) {
         return 16f * density * Math.min(1f, tileWidthPx / (DESIGN_W_DP * density));
@@ -953,9 +992,18 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 view.animate().cancel();
                 banner.animate().cancel();
                 name.animate().cancel();
-                float scale = !animations ? 1f : advancedEffects ? 1.12f : 1.10f;
+                float scale = focused ? (inDock ? 1.18f : (advancedEffects ? 1.12f : 1.10f)) : 1f;
                 float s = focused ? scale : 1f;
-                if (!animations) {
+                if (inDock) {
+                    view.animate().scaleX(s).scaleY(s)
+                            .setDuration(focused ? 240 : 180)
+                            .setInterpolator(new DecelerateInterpolator(2f))
+                            .start();
+                    name.animate().alpha(focused ? 1f : 0f)
+                            .translationY(focused ? 0f : -density * 6f)
+                            .setDuration(focused ? 220 : 120)
+                            .start();
+                } else if (!animations) {
                     view.setScaleX(1f);
                     view.setScaleY(1f);
                     view.setTranslationY(0f);
@@ -997,6 +1045,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 int pos = getBindingAdapterPosition();
                 if (focused && listener != null && pos != RecyclerView.NO_POSITION) {
                     listener.onTileFocused(pos, view);
+                } else if (!focused && inDock && listener instanceof MainActivity) {
+                    ((MainActivity) listener).hideHero();
                 }
             });
         }

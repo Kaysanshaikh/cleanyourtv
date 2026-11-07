@@ -43,14 +43,14 @@ com.xiaomi.mitv.updateservice               # firmware updates: re-enable to che
 com.xiaomo.tv.milegal                       # static legal / privacy text screens
 
 # Personal choice: voice assistant (the mic button stops working)
-com.google.android.katniss
-com.google.android.speech.pumpkin
+# com.google.android.katniss
+# com.google.android.speech.pumpkin
 
 # Personal choice: casting / mirroring
-com.google.android.apps.mediashell          # Chromecast built-in
-com.mitv.milinkservice                      # Mi Cast
-com.xiaomi.mitv.smartshare
-com.xiaomi.wfdsinkhelperservice             # Miracast sink
+ com.google.android.apps.mediashell          # Chromecast built-in
+ com.mitv.milinkservice                      # Mi Cast
+ com.xiaomi.mitv.smartshare
+ com.xiaomi.wfdsinkhelperservice             # Miracast sink
 
 # Preloaded apps
 com.xiaomi.mimusic2

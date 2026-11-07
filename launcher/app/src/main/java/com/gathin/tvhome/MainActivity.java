@@ -66,6 +66,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -159,6 +160,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean ambientGlow;
     /** config.xml app_glow: the highlight takes the focused app's colour on every tile. */
     private boolean appGlow;
+    private boolean dockGlass;
     /** config.xml glow_style: the shape setAmbient paints the glow mask in. */
     private String glowStyle;
     /** config.xml cinematic_white_focus: the cinematic shelf keeps the white highlight. */
@@ -520,6 +522,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ambientGlow = cfg.ambientGlow;
         glowSnap = cfg.glowSnap;
         appGlow = cfg.appGlow;
+        dockGlass = cfg.dockGlass;
         if (!ambientGlow) ambient.setVisibility(View.GONE);
         heroName = findViewById(R.id.heroName);
         hero = findViewById(R.id.hero);
@@ -669,7 +672,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ((GridLayoutManager) grid.getLayoutManager()).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override public int getSpanSize(int position) { return !singleRow && adapter != null && adapter.isLibraryAt(position) ? COLUMNS : 1; }
         });
-        grid.setHasFixedSize(true);
+        grid.setHasFixedSize(false);
         grid.setItemAnimator(null);
         // Tiles that scroll out while one is carried come back from the view cache without a rebind; set their
         // dimming again whenever one attaches, so none stays dim after the drop.
@@ -698,10 +701,41 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         adapter.setSavedOrder(Order.ranks(savedOrder, dockApps), Order.docked(savedOrder, dockApps));
         grid.setAdapter(adapter);
 
+        ScrollView mainScroll = findViewById(R.id.mainScroll);
+        View pageHome = findViewById(R.id.pageHome);
+        if (mainScroll != null && pageHome != null) {
+            mainScroll.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+                int scrollH = b - t;
+                if (scrollH > 0 && pageHome.getHeight() != scrollH) {
+                    ViewGroup.LayoutParams lp = pageHome.getLayoutParams();
+                    if (lp != null) {
+                        lp.height = scrollH;
+                        pageHome.setLayoutParams(lp);
+                    }
+                }
+            });
+        }
+
+        LinearLayout extraSections = findViewById(R.id.extraSectionsContainer);
+        if (extraSections != null) {
+            extraSections.removeAllViews();
+            extraSections.addView(CustomSections.createAppsRow(this, mainScroll));
+            extraSections.addView(CustomSections.createFavouritesRow(this, mainScroll));
+            extraSections.addView(CustomSections.createMoodsRow(this, mainScroll));
+        }
+
         // tvOS layout: push the dock row towards the bottom of the screen, leaving room for
         // rows_below_dock grid rows under it; the rest of the grid stays below until you press Down.
         int rowsBelowDock = cfg.rowsBelowDock;
         grid.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            if (pageHome != null) {
+                // When pageHome is used, grid is already anchored to the bottom of pageHome via layout_alignParentBottom
+                if (grid.getPaddingTop() != 0) {
+                    grid.setPadding(grid.getPaddingLeft(), 0, grid.getPaddingRight(), grid.getPaddingBottom());
+                }
+                grid.post(this::refitGlass);
+                return;
+            }
             int h = b - t;
             // Item height follows the tile size, which follows the columns and the rows that must fit (AppAdapter.tileWidthPx).
             int inner = (r - l) - grid.getPaddingLeft() - grid.getPaddingRight();
@@ -1133,6 +1167,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (showStats) startStats();
         if (gameDay != null) gameDay.start();
         sky.update();
+        fetchWeatherMumbai();
         wallpaperPlayer.start();
         handler.postDelayed(minuteTick, MINUTE_MS);
         if (festive && lamp != null) {
@@ -1798,6 +1833,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     public void onTileFocused(int position, View card) {
         lastFocused = position;
         lastFocusedKey = adapter.keyAt(position);
+        ScrollView mainScroll = findViewById(R.id.mainScroll);
+        if (mainScroll != null && mainScroll.getScrollY() != 0) {
+            mainScroll.smoothScrollTo(0, 0);
+        }
         // Focus restored before the first layout (cold start): the tile has no size yet, and the glass
         // would be sized to 2*pad. Run again once the tile is laid out.
         if (card.getWidth() == 0) {
@@ -1839,7 +1878,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             glassAccent = accent;
             glass.setAccent(accent);
         }
-        if (!glassShown) {
+        if (!dockGlass && (singleRow || position < COLUMNS)) {
+            hideGlass();
+        } else if (!glassShown) {
             springX.cancel();
             springY.cancel();
             glass.setTranslationX(x);
@@ -1907,77 +1948,79 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void showHero(int position, float dockTopInRoot) {
         String label = adapter.labelAt(position);
         int color = adapter.ambientColorAt(position);
-        float y = dockTopInRoot - 14 * density - 26 * density - hero.getHeight();
-        boolean changed = !label.contentEquals(heroName.getText());
-        if (cinematic && heroArtAlpha > 0f) showHeroArt(position);
-
-        if (!animations || reducedMotion) {
-            // Snap the shelf instead of sliding and fading it: each of those frames repaints the
-            // full-screen panel, and this switch exists for the GPUs that cannot afford it.
-            hero.animate().cancel();
-            ambient.animate().cancel();
-            fillHero(position, label);
-            hero.setY(y);
-            hero.setTranslationX(0f);
-            hero.setAlpha(1f);
-            if (ambientGlow) {
-                setAmbient(color);
-                ambient.setAlpha(1f);
-            }
-            heroShown = true;
-            return;
-        }
-
-        if (!heroShown) {
-            stopAmbientAnimation();
-            hero.animate().cancel();
-            ambient.animate().cancel();
-            fillHero(position, label);
-            hero.setY(y);
-            hero.setTranslationX(0f);
-            hero.animate().alpha(1f).setDuration(260).start();
-            if (ambientGlow) {
-                setAmbient(color);
-                ambient.animate().alpha(1f).setDuration(600).start();
-            }
-            heroShown = true;
-        } else if (changed) {
-            if (advancedEffects) hero.animate().cancel();
-            hero.animate().alpha(0f).translationX(-12 * density).setDuration(120).withEndAction(() -> {
-                fillHero(position, label);
-                hero.setY(y);
-                hero.setTranslationX(12 * density);
-                hero.animate().alpha(1f).translationX(0f).setDuration(200).start();
-            }).start();
-            if (ambientGlow && advancedEffects) {
-                transitionAmbient(color);
-            } else if (ambientGlow && color != ambientColor && glowSnap) {
-                ambient.animate().cancel();
-                setAmbient(color);
-                ambient.setAlpha(1f);
-            } else if (ambientGlow && color != ambientColor) {
-                ambient.animate().alpha(0.35f).setDuration(200).withEndAction(() -> {
-                    setAmbient(color);
-                    ambient.animate().alpha(1f).setDuration(500).start();
-                }).start();
-            }
+        fillHero(position, label);
+        RecyclerView.ViewHolder vh = grid.findViewHolderForAdapterPosition(position);
+        View card = vh == null ? null : vh.itemView.findViewById(R.id.card);
+        float y;
+        if (card != null) {
+            int[] loc = new int[2];
+            card.getLocationOnScreen(loc);
+            float hHeight = hero.getHeight() > 0 ? hero.getHeight() : 48 * density;
+            y = loc[1] - hHeight - 14 * density;
         } else {
-            hero.setY(y);
-            // onPause cancels the fade-ins, and a second Home during one lands on the same tile, which starts none:
-            // finish them, or the shelf and the glow stay dim until focus moves to another app.
-            if (hero.getAlpha() < 1f) hero.animate().alpha(1f).setDuration(260).start();
-            if (ambientGlow && color == ambientColor && ambient.getAlpha() < 1f) {
-                ambient.animate().alpha(1f).setDuration(600).start();
-            }
+            y = dockTopInRoot - 48 * density - 14 * density;
         }
+        hero.setY(y);
+        hero.setTranslationX(0f);
+        hero.animate().cancel();
+        hero.animate().alpha(1f).setDuration(220).start();
+        if (ambientGlow) {
+            transitionAmbient(color);
+        }
+        heroShown = true;
     }
 
-    /** The shelf's text for this dock app: its name and, on the cinematic shelf, "Last opened" and the dots. */
+    /** The shelf's text for this dock app: its quote line (Section 5 Tagline). */
     private void fillHero(int position, String label) {
-        heroName.setText(label);
+        String pkg = adapter != null ? adapter.packageAt(position) : "";
+        String tagline = null;
+        if ("com.netflix.ninja".equals(pkg)) tagline = "Bazinga.";
+        else if ("com.amazon.amazonvideo.livingroom".equals(pkg)) tagline = "Run, Barry, run.";
+        else if ("in.startv.hotstar".equals(pkg)) tagline = "Legen… wait for it… dary.";
+        else if ("com.mxtech.videoplayer.television".equals(pkg) || "com.mxtech.videoplayer.ad".equals(pkg)) tagline = "Your personal cinema.";
+        else if ("com.google.android.youtube.tv".equals(pkg)) tagline = "Broadcast yourself.";
+        else if ("com.apple.atve.androidtv.appletv".equals(pkg)) tagline = "All the best stories.";
+
+        if (tagline != null) {
+            heroName.setText(tagline);
+        } else {
+            heroName.setText(label);
+        }
         if (!cinematic) return;
         updateHeroMeta(position);
         updateHeroDots(position);
+    }
+
+    private long lastWeatherFetch = 0;
+    private void fetchWeatherMumbai() {
+        long now = System.currentTimeMillis();
+        if (now - lastWeatherFetch < 1800000L && lastWeatherFetch > 0) return;
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL("https://api.open-meteo.com/v1/forecast?latitude=19.0760&longitude=72.8777&current=temperature_2m,weather_code");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                java.io.InputStream in = conn.getInputStream();
+                java.util.Scanner s = new java.util.Scanner(in).useDelimiter("\\A");
+                String resp = s.hasNext() ? s.next() : "";
+                s.close();
+                in.close();
+                org.json.JSONObject json = new org.json.JSONObject(resp);
+                org.json.JSONObject cur = json.getJSONObject("current");
+                float temp = (float) cur.getDouble("temperature_2m");
+                int code = cur.getInt("weather_code");
+                String icon = (code == 0) ? "☀️" : (code <= 3) ? "⛅" : (code <= 67) ? "🌧️" : "☁️";
+                String text = Math.round(temp) + "°C";
+                lastWeatherFetch = System.currentTimeMillis();
+                runOnUiThread(() -> {
+                    TextView d = findViewById(R.id.date);
+                    TextView wIcon = findViewById(R.id.weatherIcon);
+                    if (d != null) d.setText(text);
+                    if (wIcon != null) wIcon.setText(icon);
+                });
+            } catch (Exception ignored) {}
+        }).start();
     }
 
     // ---- cinematic shelf -------------------------------------------------------------------------
@@ -2144,7 +2187,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                         Shader.TileMode.CLAMP));
             } else {
                 paint.setShader(new RadialGradient(
-                        w * 0.32f, h * 0.42f, w * 0.62f,
+                        w * 0.35f, h * 0.74f, w * 0.60f,
                         new int[]{0x5CFFFFFF, 0x26FFFFFF, 0x00FFFFFF},
                         new float[]{0f, 0.45f, 1f},
                         Shader.TileMode.CLAMP));
@@ -2215,7 +2258,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }).start();
     }
 
-    private void hideHero() {
+    public void hideHero() {
         if (!heroShown) return;
         stopAmbientAnimation();
         hero.animate().cancel();
@@ -2421,15 +2464,43 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     // ---- navigation ------------------------------------------------------------------------------
 
+    private View findFirstFocusable(View v) {
+        if (v.isFocusable() && v.getVisibility() == View.VISIBLE) return v;
+        if (v instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) v;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                View found = findFirstFocusable(vg.getChildAt(i));
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
     @Override
     public boolean onTileVerticalKey(int position, int keyCode) {
         int count = adapter.appCount();
         int target;
         if (singleRow) {
-            // One row: Up leaves for the top bar, Down has nowhere to go, and Left/Right walk the whole row,
-            // stopping at its two ends (the default focus search scrolls the row to the next tile).
+            // One row: Up leaves for the top bar, Down moves to extraSectionsContainer.
             if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return false;
-            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) return true;
+            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                View appsFirst = findViewById(10011);
+                if (appsFirst != null) {
+                    hideHero();
+                    appsFirst.requestFocus();
+                    return true;
+                }
+                LinearLayout extraSections = findViewById(R.id.extraSectionsContainer);
+                if (extraSections != null && extraSections.getChildCount() > 0) {
+                    View targetView = findFirstFocusable(extraSections);
+                    if (targetView != null) {
+                        hideHero();
+                        targetView.requestFocus();
+                        return true;
+                    }
+                }
+                return true;
+            }
             boolean forward = rtlAppGrid ? keyCode == KeyEvent.KEYCODE_DPAD_LEFT : keyCode == KeyEvent.KEYCODE_DPAD_RIGHT;
             int last = adapter.focusablePosition(count - 1);
             if (forward && position >= last) {
@@ -2457,6 +2528,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         } else {
             int lastRowStart = ((count - 1) / COLUMNS) * COLUMNS;
             if (position >= lastRowStart) {
+                LinearLayout extraSections = findViewById(R.id.extraSectionsContainer);
+                if (extraSections != null && extraSections.getChildCount() > 0) {
+                    View targetView = findFirstFocusable(extraSections);
+                    if (targetView != null) {
+                        hideHero();
+                        targetView.requestFocus();
+                        return true;
+                    }
+                }
                 if (adapter.isLibraryAt(count)) focusLibrary();
                 return true;
             }

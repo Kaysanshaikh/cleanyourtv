@@ -1,0 +1,31 @@
+{
+  "dock_apps": [
+    "com.netflix.ninja",
+    "com.amazon.amazonvideo.livingroom",
+    "in.startv.hotstar",
+    "com.mxtech.videoplayer.television",
+    "com.google.android.youtube.tv",
+    "com.apple.atve.androidtv.appletv"
+  ],
+  "fill_dock": false,
+  "columns": 6,
+  "dock_row": true,
+  "single_row": false,
+  "rows_below_dock": 0,
+  "dock_band": false,
+  "dock_glass": false,
+  "dock_even_padding": true,
+  "dock_title": true,
+  "show_greeting": false,
+  "icon_only_buttons": true,
+  "icon_only_inputs": true,
+  "app_glow": true,
+  "ambient_glow": true,
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "wallpaper_true_color": true,
+  "background_color": "#000000",
+  "focus_overshoot": false,
+  "advanced_effects": true,
+  "app_library": false
+}
