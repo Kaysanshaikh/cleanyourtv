@@ -1,9 +1,11 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="130dp"
-    android:height="85dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:width="96dp"
+    android:height="68dp"
+    android:viewportWidth="256"
+    android:viewportHeight="180">
+    <!-- Official YouTube play button with evenOdd transparent cutout, full tight viewBox -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+        android:fillType="evenOdd"
+        android:pathData="M250.346,29.358 C246.3,14.6 234.6,3 227.3,0.738 C207.72,0 128,0 128,0 C128,0 48.28,0 28.7,0.738 C21.4,3 9.7,14.6 5.654,29.358 C0.6,50.354 0,90 0,90 C0,90 0.6,129.646 5.654,150.642 C9.7,165.4 21.4,177 28.7,179.262 C48.28,180 128,180 128,180 C128,180 207.72,180 227.3,179.262 C234.6,177 246.3,165.4 250.346,150.642 C255.4,129.646 256,90 256,90 C256,90 255.4,50.354 250.346,29.358 Z M102,130 L102,50 L169,90 Z" />
 </vector>

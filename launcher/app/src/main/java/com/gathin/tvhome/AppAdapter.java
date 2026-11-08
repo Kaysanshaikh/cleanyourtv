@@ -14,8 +14,10 @@ import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import androidx.core.content.ContextCompat;
 import android.net.Uri;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -488,7 +490,13 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         int dockIcon = getDockDrawable(e.pkg);
         if (dockKind && dockIcon != 0) {
             h.card.setBackground(null);
-            h.banner.setImageResource(dockIcon);
+            h.card.setClipToOutline(false);
+            Drawable crisp = getCrispDockDrawable(h.card.getContext(), dockIcon);
+            if (crisp != null) {
+                h.banner.setImageDrawable(crisp);
+            } else {
+                h.banner.setImageResource(dockIcon);
+            }
             h.banner.setScaleType(ImageView.ScaleType.FIT_CENTER);
             h.banner.setVisibility(View.VISIBLE);
             h.icon.setVisibility(View.GONE);
@@ -496,6 +504,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             h.name.setText(getDockLabel(e.pkg, e.name));
             e.ambient = getDockColor(e.pkg);
         } else {
+            h.card.setClipToOutline(true);
             // A fully opaque banner covers the whole card (centerCrop), so the card's own fill under it is drawn for
             // nothing on every frame; keep it under banners with transparent parts and under icon tiles.
             h.card.setBackground(e.banner != null && e.banner.getOpacity() == PixelFormat.OPAQUE ? null : h.cardBackground);
@@ -931,6 +940,37 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if ("com.google.android.youtube.tv".equals(pkg)) return 0xFFFF2020;
         if ("com.apple.atve.androidtv.appletv".equals(pkg)) return 0xFFE0E0E0;
         return 0;
+    }
+
+    private static final android.util.SparseArray<Drawable> sDockCrispCache = new android.util.SparseArray<>();
+
+    static Drawable getCrispDockDrawable(Context context, int resId) {
+        Drawable cached = sDockCrispCache.get(resId);
+        if (cached != null) return cached;
+        try {
+            Drawable d = ContextCompat.getDrawable(context, resId);
+            if (d == null) return null;
+            int iw = d.getIntrinsicWidth();
+            int ih = d.getIntrinsicHeight();
+            if (iw <= 0 || ih <= 0) {
+                iw = 130;
+                ih = 85;
+            }
+            // Scale intrinsic dimensions by 3x for ultra-sharp rasterization
+            int targetW = iw * 3;
+            int targetH = ih * 3;
+            Bitmap bm = Bitmap.createBitmap(targetW, targetH, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bm);
+            d.setBounds(0, 0, targetW, targetH);
+            d.draw(canvas);
+            BitmapDrawable bd = new BitmapDrawable(context.getResources(), bm);
+            bd.setFilterBitmap(true);
+            bd.setAntiAlias(true);
+            sDockCrispCache.put(resId, bd);
+            return bd;
+        } catch (Throwable t) {
+            return ContextCompat.getDrawable(context, resId);
+        }
     }
 
     /** Corner radius for a tile of this width: 16dp at the design width, proportionally less when smaller. */

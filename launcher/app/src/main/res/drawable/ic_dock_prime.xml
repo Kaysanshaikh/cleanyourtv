@@ -1,13 +1,19 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="130dp"
-    android:height="85dp"
-    android:viewportWidth="100"
-    android:viewportHeight="65">
-    <!-- Iconic Amazon Prime smile arrow matching doc Section 5 -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M16,35 C28,47 50,53 74,45 C78,43.5 82,41.5 85,39 C86,38 87,39 86.5,40 C83,43 78,46 72,48 C48,56 24,50 14,37.5 C13.5,36.8 14.5,36 15.2,36.5 L16,35 Z" />
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M81.5,35.5 C83,38 86,43 85,46 C83.5,46.5 78,44 76,42.5 C75,41.8 75.8,40.8 77,41.2 C79.5,42.2 82.5,43 83.5,41 C84.5,39 82.5,36 80.5,34.5 C79.8,34 80.5,33.5 81.5,35.5 Z" />
+    android:width="120dp"
+    android:height="30dp"
+    android:viewportWidth="324"
+    android:viewportHeight="82">
+    <!-- Official Amazon Prime Video smile arrow, tight bounding box for full tile scaling -->
+    <group
+        android:translateX="-84"
+        android:translateY="-103">
+        <!-- Smile curve -->
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M374.006,142.184 C339.006,167.981 288.277,181.745 244.6,181.745 C183.358,181.745 128.224,159.094 86.513,121.42 C83.235,118.458 86.172,114.42 90.104,116.727 C135.119,142.918 190.777,158.674 248.27,158.674 C287.045,158.674 329.7,150.652 368.92,134.004 C374.845,131.488 379.8,137.884 374.006,142.184 Z" />
+        <!-- Arrowhead -->
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M388.557,125.536 C384.1,119.821 358.984,122.836 347.711,124.173 C344.277,124.593 343.752,121.603 346.846,119.454 C366.849,105.376 399.673,109.439 403.5,114.158 C407.328,118.903 402.504,151.806 383.707,167.51 C380.823,169.921 378.07,168.637 379.355,165.438 C383.575,154.899 393.04,131.278 388.557,125.536 Z" />
+    </group>
 </vector>
