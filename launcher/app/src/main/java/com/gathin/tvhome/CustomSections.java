@@ -3,6 +3,7 @@ package com.gathin.tvhome;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import androidx.core.content.ContextCompat;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -315,12 +316,22 @@ public final class CustomSections {
                         continue;
                     }
 
-                    // Verify valid launch intent exists
-                    Intent launchIntent = pm.getLaunchIntentForPackage(pkg);
+                    // Verify valid launch intent exists (check leanback first, then normal, or fallback to component)
+                    Intent launchIntent = pm.getLeanbackLaunchIntentForPackage(pkg);
+                    if (launchIntent == null) {
+                        launchIntent = pm.getLaunchIntentForPackage(pkg);
+                    }
+                    if (launchIntent == null && ri.activityInfo != null) {
+                        launchIntent = new Intent(Intent.ACTION_MAIN)
+                                .setComponent(new android.content.ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
+                        if (Intent.CATEGORY_LEANBACK_LAUNCHER.equals(cat)) {
+                            launchIntent.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+                        }
+                    }
                     if (launchIntent == null) continue;
 
                     // Exclude internal TV setup/glance/daemons
-                    if (pkg.contains("android.tvsetup") || pkg.contains("glance") || pkg.contains("updateservice") || pkg.contains("feedback") || pkg.contains("framework")) continue;
+                    if (pkg.contains("android.tvsetup") || pkg.contains("glance") || pkg.contains("updateservice") || pkg.contains("feedback") || pkg.contains("framework") || pkg.contains("priv.ctsshim") || pkg.contains("overlay")) continue;
 
                     if (!appMap.containsKey(pkg)) {
                         appMap.put(pkg, ri);
@@ -348,6 +359,13 @@ public final class CustomSections {
                 CharSequence label = ri.loadLabel(pm);
                 if (label != null) name = label.toString();
             } catch (Exception ignored) {}
+            name = AppAdapter.getDockLabel(pkg, name);
+            int dockRes = AppAdapter.getDockDrawable(pkg);
+            if (icon == null && dockRes != 0) {
+                try {
+                    icon = ContextCompat.getDrawable(activity, dockRes);
+                } catch (Exception ignored) {}
+            }
 
             FrameLayout card = new FrameLayout(activity);
             if (first) {
@@ -409,17 +427,27 @@ public final class CustomSections {
             card.addView(content);
 
             final String finalPkg = pkg;
+            final ResolveInfo finalRi = ri;
+            final String finalName = name;
             card.setOnClickListener(v -> {
                 try {
-                    Intent it = pm.getLaunchIntentForPackage(finalPkg);
+                    Intent it = pm.getLeanbackLaunchIntentForPackage(finalPkg);
+                    if (it == null) {
+                        it = pm.getLaunchIntentForPackage(finalPkg);
+                    }
+                    if (it == null && finalRi.activityInfo != null) {
+                        it = new Intent(Intent.ACTION_MAIN)
+                                .setComponent(new android.content.ComponentName(finalRi.activityInfo.packageName, finalRi.activityInfo.name));
+                        it.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+                    }
                     if (it != null) {
-                        it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                         activity.startActivity(it);
                     } else if ("com.android.tv.settings".equals(finalPkg)) {
                         activity.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
                     }
                 } catch (Exception ex) {
-                    Toast.makeText(activity, "Launching...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "Opening " + finalName + "...", Toast.LENGTH_SHORT).show();
                 }
             });
 

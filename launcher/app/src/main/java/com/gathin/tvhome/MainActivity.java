@@ -718,11 +718,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             });
         }
 
-        LinearLayout extraSections = findViewById(R.id.extraSectionsContainer);
-        if (extraSections != null) {
-            extraSections.removeAllViews();
-            extraSections.addView(CustomSections.createAppsRow(this, mainScroll));
-        }
+        refreshExtraSections();
 
         // tvOS layout: push the dock row towards the bottom of the screen, leaving room for
         // rows_below_dock grid rows under it; the rest of the grid stays below until you press Down.
@@ -1150,6 +1146,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (openLiveTvAfterBoot()) return;
         updateGreeting();
         updatePanel();
+        refreshExtraSections();
         // Back from an app opened from its tile, focus is still on that tile, so the cinematic "Last opened" line kept
         // the time from before this launch ("2 days ago" right after opening it). Refresh it.
         if (cinematic && heroMeta != null && lastFocused >= 0 && lastFocused < adapter.appCount()) updateHeroMeta(lastFocused);
@@ -1263,6 +1260,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             tilesReady = true;
             startPendingSettingsReorder();
             showCardPrompt();
+        }
+        refreshExtraSections();
+    }
+
+    private void refreshExtraSections() {
+        LinearLayout extraSections = findViewById(R.id.extraSectionsContainer);
+        if (extraSections != null) {
+            ScrollView mainScroll = findViewById(R.id.mainScroll);
+            extraSections.removeAllViews();
+            extraSections.addView(CustomSections.createAppsRow(this, mainScroll));
         }
     }
 
