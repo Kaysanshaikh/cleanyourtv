@@ -336,7 +336,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginTop="0dp"
-            android:fillViewport="true"
+            android:fillViewport="false"
             android:scrollbars="none"
             android:clipChildren="false"
             android:clipToPadding="false"
@@ -378,6 +378,7 @@
                     android:id="@+id/extraSectionsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="180dp"
                     android:orientation="vertical"
                     android:clipChildren="false"
                     android:clipToPadding="false" />

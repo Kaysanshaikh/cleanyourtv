@@ -255,9 +255,15 @@ public final class CustomSections {
         LinearLayout layout = new LinearLayout(activity);
         layout.setId(ID_APPS_ROW);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(Math.round(56 * density), Math.round(20 * density), Math.round(56 * density), Math.round(16 * density));
+        layout.setPadding(Math.round(56 * density), Math.round(20 * density), Math.round(56 * density), Math.round(24 * density));
         layout.setClipChildren(false);
         layout.setClipToPadding(false);
+
+        int rowH = Math.round(180 * density);
+        LinearLayout.LayoutParams layoutLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layout.setLayoutParams(layoutLp);
+        layout.setMinimumHeight(rowH);
 
         TextView header = new TextView(activity);
         header.setText("MY APPS");
@@ -274,10 +280,18 @@ public final class CustomSections {
         scroll.setClipToPadding(false);
         scroll.setClipChildren(false);
 
+        int scrollH = Math.round(100 * density);
+        LinearLayout.LayoutParams scrollLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, scrollH);
+        scroll.setLayoutParams(scrollLp);
+
         LinearLayout row = new LinearLayout(activity);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setClipToPadding(false);
         row.setClipChildren(false);
+        FrameLayout.LayoutParams rowLp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        row.setLayoutParams(rowLp);
 
         PackageManager pm = activity.getPackageManager();
         String selfPkg = activity.getPackageName();
