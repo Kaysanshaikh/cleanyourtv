@@ -1,12 +1,14 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="90dp"
-    android:height="52dp"
-    android:viewportWidth="72"
-    android:viewportHeight="42">
-    <!-- Clean Apple TV logo, tight viewBox -->
+    android:width="120dp"
+    android:height="70dp"
+    android:viewportWidth="120"
+    android:viewportHeight="70">
+    <!-- Clean, bold Apple TV logo with prominent visible 'T' and 'V', balanced dock sizing -->
     <group
-        android:translateX="-6"
-        android:translateY="-5">
+        android:translateX="24.15"
+        android:translateY="13.65"
+        android:scaleX="0.826"
+        android:scaleY="0.826">
         <!-- Apple body -->
         <path
             android:fillColor="#FFFFFFFF"
@@ -15,13 +17,13 @@
         <path
             android:fillColor="#FFFFFFFF"
             android:pathData="M26.3,13.4 C27.5,11.9 28.3,9.8 28.1,7.7 C26.3,7.8 24,8.9 22.8,10.4 C21.7,11.7 20.7,13.8 21,15.9 C23,16 25.1,14.9 26.3,13.4 Z" />
-        <!-- 't' letter -->
+        <!-- Bold, prominent 'T' letter -->
         <path
             android:fillColor="#FFFFFFFF"
-            android:pathData="M43,21 L53,21 L53,25 L49.5,25 L49.5,43 L45,43 L45,25 L43,25 Z" />
-        <!-- 'v' letter -->
+            android:pathData="M40,17 L57,17 L57,23 L52,23 L52,44 L45,44 L45,23 L40,23 Z" />
+        <!-- Bold, prominent 'V' letter -->
         <path
             android:fillColor="#FFFFFFFF"
-            android:pathData="M54,21 L58.5,21 L63.5,37 L68.5,21 L73,21 L66,43 L61,43 Z" />
+            android:pathData="M58,17 L64.5,17 L69,36 L73.5,17 L80,17 L73,44 L65,44 Z" />
     </group>
 </vector>

@@ -1,12 +1,14 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="100dp"
-    android:height="45dp"
-    android:viewportWidth="102"
-    android:viewportHeight="47">
-    <!-- Crisp bold MX Player logo with play triangle accent, tight viewBox -->
+    android:width="120dp"
+    android:height="70dp"
+    android:viewportWidth="120"
+    android:viewportHeight="70">
+    <!-- Crisp bold MX Player logo with play triangle accent, balanced dock sizing -->
     <group
-        android:translateX="-79"
-        android:translateY="-61.5">
+        android:translateX="-23.2"
+        android:translateY="-19.4"
+        android:scaleX="0.64"
+        android:scaleY="0.64">
         <!-- 'M' letter -->
         <path
             android:fillColor="#FFFFFFFF"

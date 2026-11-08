@@ -1,19 +1,25 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="120dp"
-    android:height="30dp"
-    android:viewportWidth="324"
-    android:viewportHeight="82">
-    <!-- Official Amazon Prime Video smile arrow, tight bounding box for full tile scaling -->
+    android:height="70dp"
+    android:viewportWidth="120"
+    android:viewportHeight="70">
+    <!-- Official Amazon Prime Video smile arrow, balanced dock sizing -->
     <group
-        android:translateX="-84"
-        android:translateY="-103">
-        <!-- Smile curve -->
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M374.006,142.184 C339.006,167.981 288.277,181.745 244.6,181.745 C183.358,181.745 128.224,159.094 86.513,121.42 C83.235,118.458 86.172,114.42 90.104,116.727 C135.119,142.918 190.777,158.674 248.27,158.674 C287.045,158.674 329.7,150.652 368.92,134.004 C374.845,131.488 379.8,137.884 374.006,142.184 Z" />
-        <!-- Arrowhead -->
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M388.557,125.536 C384.1,119.821 358.984,122.836 347.711,124.173 C344.277,124.593 343.752,121.603 346.846,119.454 C366.849,105.376 399.673,109.439 403.5,114.158 C407.328,118.903 402.504,151.806 383.707,167.51 C380.823,169.921 378.07,168.637 379.355,165.438 C383.575,154.899 393.04,131.278 388.557,125.536 Z" />
+        android:translateX="23.0"
+        android:translateY="25.6"
+        android:scaleX="0.2284"
+        android:scaleY="0.2284">
+        <group
+            android:translateX="-84"
+            android:translateY="-103">
+            <!-- Smile curve -->
+            <path
+                android:fillColor="#FFFFFFFF"
+                android:pathData="M374.006,142.184 C339.006,167.981 288.277,181.745 244.6,181.745 C183.358,181.745 128.224,159.094 86.513,121.42 C83.235,118.458 86.172,114.42 90.104,116.727 C135.119,142.918 190.777,158.674 248.27,158.674 C287.045,158.674 329.7,150.652 368.92,134.004 C374.845,131.488 379.8,137.884 374.006,142.184 Z" />
+            <!-- Arrowhead -->
+            <path
+                android:fillColor="#FFFFFFFF"
+                android:pathData="M388.557,125.536 C384.1,119.821 358.984,122.836 347.711,124.173 C344.277,124.593 343.752,121.603 346.846,119.454 C366.849,105.376 399.673,109.439 403.5,114.158 C407.328,118.903 402.504,151.806 383.707,167.51 C380.823,169.921 378.07,168.637 379.355,165.438 C383.575,154.899 393.04,131.278 388.557,125.536 Z" />
+        </group>
     </group>
 </vector>

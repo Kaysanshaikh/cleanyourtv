@@ -966,6 +966,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             BitmapDrawable bd = new BitmapDrawable(context.getResources(), bm);
             bd.setFilterBitmap(true);
             bd.setAntiAlias(true);
+            bd.setDither(true);
             sDockCrispCache.put(resId, bd);
             return bd;
         } catch (Throwable t) {
@@ -1032,12 +1033,13 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 view.animate().cancel();
                 banner.animate().cancel();
                 name.animate().cancel();
-                float scale = focused ? (inDock ? 1.0f : (advancedEffects ? 1.12f : 1.10f)) : 1f;
+                float scale = focused ? (inDock ? 1.10f : (advancedEffects ? 1.12f : 1.10f)) : 1f;
                 float s = focused ? scale : 1f;
                 if (inDock) {
                     view.animate().scaleX(s).scaleY(s)
                             .setDuration(focused ? 240 : 180)
                             .setInterpolator(new DecelerateInterpolator(2f))
+                            .withLayer()
                             .start();
                     name.animate().alpha(focused ? 1f : 0f)
                             .translationY(focused ? 0f : -density * 6f)

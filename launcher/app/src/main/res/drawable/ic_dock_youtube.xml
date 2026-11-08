@@ -1,11 +1,17 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="96dp"
-    android:height="68dp"
-    android:viewportWidth="256"
-    android:viewportHeight="180">
-    <!-- Official YouTube play button with evenOdd transparent cutout, full tight viewBox -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:fillType="evenOdd"
-        android:pathData="M250.346,29.358 C246.3,14.6 234.6,3 227.3,0.738 C207.72,0 128,0 128,0 C128,0 48.28,0 28.7,0.738 C21.4,3 9.7,14.6 5.654,29.358 C0.6,50.354 0,90 0,90 C0,90 0.6,129.646 5.654,150.642 C9.7,165.4 21.4,177 28.7,179.262 C48.28,180 128,180 128,180 C128,180 207.72,180 227.3,179.262 C234.6,177 246.3,165.4 250.346,150.642 C255.4,129.646 256,90 256,90 C256,90 255.4,50.354 250.346,29.358 Z M102,130 L102,50 L169,90 Z" />
+    android:width="120dp"
+    android:height="70dp"
+    android:viewportWidth="120"
+    android:viewportHeight="70">
+    <!-- Official YouTube play button with evenOdd transparent cutout, balanced dock sizing -->
+    <group
+        android:translateX="38.66"
+        android:translateY="20.0"
+        android:scaleX="0.1667"
+        android:scaleY="0.1667">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M250.346,29.358 C246.3,14.6 234.6,3 227.3,0.738 C207.72,0 128,0 128,0 C128,0 48.28,0 28.7,0.738 C21.4,3 9.7,14.6 5.654,29.358 C0.6,50.354 0,90 0,90 C0,90 0.6,129.646 5.654,150.642 C9.7,165.4 21.4,177 28.7,179.262 C48.28,180 128,180 128,180 C128,180 207.72,180 227.3,179.262 C234.6,177 246.3,165.4 250.346,150.642 C255.4,129.646 256,90 256,90 C256,90 255.4,50.354 250.346,29.358 Z M102,130 L102,50 L169,90 Z" />
+    </group>
 </vector>
