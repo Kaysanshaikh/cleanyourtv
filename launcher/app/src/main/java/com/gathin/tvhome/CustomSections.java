@@ -337,10 +337,14 @@ public final class CustomSections {
             Drawable icon = null;
             String name = pkg;
             try {
-                if (ri.activityInfo != null) {
-                    icon = ri.activityInfo.loadBanner(pm);
+                // Use crisp high-resolution square app icon rather than squishing a wide 16:9 banner
+                icon = ri.loadIcon(pm);
+                if (icon == null && ri.activityInfo != null) {
+                    icon = ri.activityInfo.loadIcon(pm);
                 }
-                if (icon == null) icon = ri.loadIcon(pm);
+                if (icon == null) {
+                    icon = pm.getApplicationIcon(pkg);
+                }
                 CharSequence label = ri.loadLabel(pm);
                 if (label != null) name = label.toString();
             } catch (Exception ignored) {}
@@ -355,21 +359,21 @@ public final class CustomSections {
             card.setNextFocusUpId(R.id.grid);
             card.setNextFocusDownId(View.NO_ID); // Final bottom section
 
-            int cw = Math.round(172 * density);
-            int ch = Math.round(74 * density);
+            int cw = Math.round(212 * density);
+            int ch = Math.round(68 * density);
             LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(cw, ch);
             clp.setMargins(Math.round(8 * density), 0, Math.round(8 * density), 0);
             card.setLayoutParams(clp);
 
             GradientDrawable normBg = new GradientDrawable();
             normBg.setShape(GradientDrawable.RECTANGLE);
-            normBg.setCornerRadius(14 * density);
+            normBg.setCornerRadius(16 * density);
             normBg.setColor(0x28FFFFFF);
             normBg.setStroke(Math.round(1 * density), 0x2EFFFFFF);
 
             GradientDrawable focBg = new GradientDrawable();
             focBg.setShape(GradientDrawable.RECTANGLE);
-            focBg.setCornerRadius(14 * density);
+            focBg.setCornerRadius(16 * density);
             focBg.setColor(0x4DFFFFFF);
             focBg.setStroke(Math.round(2.5f * density), Color.WHITE);
 
@@ -377,13 +381,13 @@ public final class CustomSections {
 
             LinearLayout content = new LinearLayout(activity);
             content.setOrientation(LinearLayout.HORIZONTAL);
-            content.setGravity(Gravity.CENTER);
-            content.setPadding(Math.round(12 * density), Math.round(8 * density), Math.round(12 * density), Math.round(8 * density));
+            content.setGravity(Gravity.CENTER_VERTICAL);
+            content.setPadding(Math.round(16 * density), Math.round(10 * density), Math.round(16 * density), Math.round(10 * density));
 
             ImageView iv = new ImageView(activity);
-            int iconSize = Math.round(36 * density);
+            int iconSize = Math.round(42 * density);
             LinearLayout.LayoutParams ivLp = new LinearLayout.LayoutParams(iconSize, iconSize);
-            ivLp.setMarginEnd(Math.round(10 * density));
+            ivLp.setMarginEnd(Math.round(12 * density));
             iv.setLayoutParams(ivLp);
             if (icon != null) iv.setImageDrawable(icon);
             else if ("com.android.vending".equals(pkg)) iv.setImageResource(R.drawable.ic_apps_pill);
@@ -394,10 +398,12 @@ public final class CustomSections {
             TextView tv = new TextView(activity);
             tv.setText(name);
             tv.setTextColor(Color.WHITE);
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
             tv.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
             tv.setSingleLine(true);
             tv.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            LinearLayout.LayoutParams tvLp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+            tv.setLayoutParams(tvLp);
             content.addView(tv);
 
             card.addView(content);
