@@ -4,6 +4,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import androidx.core.content.ContextCompat;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -266,14 +271,90 @@ public final class CustomSections {
         layout.setLayoutParams(layoutLp);
         layout.setMinimumHeight(rowH);
 
+        // Header row with "MY APPS" title on the left and glass Search Bar on the right
+        LinearLayout headerRow = new LinearLayout(activity);
+        headerRow.setOrientation(LinearLayout.HORIZONTAL);
+        headerRow.setGravity(Gravity.CENTER_VERTICAL);
+        headerRow.setPadding(0, 0, 0, Math.round(14 * density));
+        LinearLayout.LayoutParams headerRowLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        headerRow.setLayoutParams(headerRowLp);
+
         TextView header = new TextView(activity);
         header.setText("MY APPS");
         header.setTextColor(0x8CFFFFFF);
         header.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         header.setLetterSpacing(0.12f);
         header.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
-        header.setPadding(0, 0, 0, Math.round(14 * density));
-        layout.addView(header);
+        LinearLayout.LayoutParams headerLp = new LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+        header.setLayoutParams(headerLp);
+        headerRow.addView(header);
+
+        // Search bar pill
+        int searchW = Math.round(280 * density);
+        int searchH = Math.round(38 * density);
+        LinearLayout searchPill = new LinearLayout(activity);
+        searchPill.setId(10010);
+        searchPill.setOrientation(LinearLayout.HORIZONTAL);
+        searchPill.setGravity(Gravity.CENTER_VERTICAL);
+        searchPill.setFocusable(true);
+        searchPill.setClickable(true);
+        searchPill.setNextFocusUpId(R.id.grid);
+        searchPill.setNextFocusDownId(10011);
+        searchPill.setPadding(Math.round(12 * density), 0, Math.round(10 * density), 0);
+        LinearLayout.LayoutParams searchPillLp = new LinearLayout.LayoutParams(searchW, searchH);
+        searchPill.setLayoutParams(searchPillLp);
+
+        GradientDrawable searchNormBg = new GradientDrawable();
+        searchNormBg.setShape(GradientDrawable.RECTANGLE);
+        searchNormBg.setCornerRadius(19 * density);
+        searchNormBg.setColor(0x28FFFFFF);
+        searchNormBg.setStroke(Math.round(1 * density), 0x2EFFFFFF);
+
+        GradientDrawable searchFocBg = new GradientDrawable();
+        searchFocBg.setShape(GradientDrawable.RECTANGLE);
+        searchFocBg.setCornerRadius(19 * density);
+        searchFocBg.setColor(0x4DFFFFFF);
+        searchFocBg.setStroke(Math.round(2f * density), Color.WHITE);
+
+        searchPill.setBackground(searchNormBg);
+
+        ImageView searchIcon = new ImageView(activity);
+        int searchIconSize = Math.round(18 * density);
+        LinearLayout.LayoutParams searchIconLp = new LinearLayout.LayoutParams(searchIconSize, searchIconSize);
+        searchIconLp.setMarginEnd(Math.round(8 * density));
+        searchIcon.setLayoutParams(searchIconLp);
+        searchIcon.setImageResource(R.drawable.ic_search);
+        searchIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        searchPill.addView(searchIcon);
+
+        EditText searchInput = new EditText(activity);
+        searchInput.setHint("Search apps...");
+        searchInput.setHintTextColor(0x66FFFFFF);
+        searchInput.setTextColor(Color.WHITE);
+        searchInput.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        searchInput.setBackground(null);
+        searchInput.setSingleLine(true);
+        searchInput.setMaxLines(1);
+        searchInput.setImeOptions(EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+        searchInput.setPadding(0, 0, 0, 0);
+        LinearLayout.LayoutParams searchInputLp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+        searchInput.setLayoutParams(searchInputLp);
+        searchPill.addView(searchInput);
+
+        ImageView clearBtn = new ImageView(activity);
+        int clearSize = Math.round(16 * density);
+        LinearLayout.LayoutParams clearLp = new LinearLayout.LayoutParams(clearSize, clearSize);
+        clearBtn.setLayoutParams(clearLp);
+        clearBtn.setImageResource(R.drawable.ic_clear);
+        clearBtn.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        clearBtn.setVisibility(View.GONE);
+        clearBtn.setFocusable(false);
+        searchPill.addView(clearBtn);
+
+        headerRow.addView(searchPill);
+        layout.addView(headerRow);
 
         HorizontalScrollView scroll = new HorizontalScrollView(activity);
         scroll.setHorizontalScrollBarEnabled(false);
@@ -368,14 +449,22 @@ public final class CustomSections {
             }
 
             FrameLayout card = new FrameLayout(activity);
+            card.setTag(name.toLowerCase());
             if (first) {
                 card.setId(10011);
                 first = false;
             }
             card.setFocusable(true);
             card.setClickable(true);
-            card.setNextFocusUpId(R.id.grid);
+            card.setNextFocusUpId(10010);
             card.setNextFocusDownId(View.NO_ID); // Final bottom section
+            card.setOnKeyListener((v, keyCode, event) -> {
+                if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    searchPill.requestFocus();
+                    return true;
+                }
+                return false;
+            });
 
             int cw = Math.round(212 * density);
             int ch = Math.round(68 * density);
@@ -470,6 +559,90 @@ public final class CustomSections {
 
         scroll.addView(row);
         layout.addView(scroll);
+
+        TextView noResults = new TextView(activity);
+        noResults.setTextColor(0x77FFFFFF);
+        noResults.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        noResults.setGravity(Gravity.CENTER);
+        noResults.setPadding(0, Math.round(24 * density), 0, Math.round(24 * density));
+        noResults.setVisibility(View.GONE);
+        layout.addView(noResults);
+
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String q = s != null ? s.toString().trim().toLowerCase() : "";
+                clearBtn.setVisibility(q.isEmpty() ? View.GONE : View.VISIBLE);
+                int visibleCount = 0;
+                for (int i = 0; i < row.getChildCount(); i++) {
+                    View c = row.getChildAt(i);
+                    String appName = (String) c.getTag();
+                    if (appName == null || q.isEmpty() || appName.contains(q)) {
+                        c.setVisibility(View.VISIBLE);
+                        visibleCount++;
+                    } else {
+                        c.setVisibility(View.GONE);
+                    }
+                }
+                noResults.setVisibility(visibleCount == 0 ? View.VISIBLE : View.GONE);
+                if (visibleCount == 0) {
+                    noResults.setText("No apps found matching \"" + q + "\"");
+                }
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        clearBtn.setOnClickListener(v -> {
+            searchInput.setText("");
+            searchPill.requestFocus();
+        });
+
+        searchPill.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                searchPill.setBackground(searchFocBg);
+                searchPill.animate().scaleX(1.04f).scaleY(1.04f).setDuration(180).start();
+                smoothScrollToSection(mainScroll, layout);
+                if (activity instanceof MainActivity) {
+                    ((MainActivity) activity).hideHero();
+                }
+            } else {
+                searchPill.setBackground(searchNormBg);
+                searchPill.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
+            }
+        });
+
+        searchPill.setOnClickListener(v -> {
+            searchInput.requestFocus();
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.showSoftInput(searchInput, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+
+        View.OnKeyListener searchNav = (v, keyCode, event) -> {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    for (int i = 0; i < row.getChildCount(); i++) {
+                        View c = row.getChildAt(i);
+                        if (c.getVisibility() == View.VISIBLE) {
+                            c.requestFocus();
+                            return true;
+                        }
+                    }
+                } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    View grid = activity.findViewById(R.id.grid);
+                    if (grid != null) {
+                        grid.requestFocus();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+        searchPill.setOnKeyListener(searchNav);
+        searchInput.setOnKeyListener(searchNav);
+
         return layout;
     }
 

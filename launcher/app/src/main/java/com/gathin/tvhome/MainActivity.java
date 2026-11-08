@@ -2491,6 +2491,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // One row: Up leaves for the top bar, Down moves to extraSectionsContainer.
             if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return false;
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                View searchBar = findViewById(10010);
+                if (searchBar != null) {
+                    hideHero();
+                    searchBar.requestFocus();
+                    return true;
+                }
                 View appsFirst = findViewById(10011);
                 if (appsFirst != null) {
                     hideHero();
