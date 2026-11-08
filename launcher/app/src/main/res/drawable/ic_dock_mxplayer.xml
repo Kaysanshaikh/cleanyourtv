@@ -5,10 +5,10 @@
     android:viewportHeight="70">
     <!-- Crisp bold MX Player logo with play triangle accent, balanced dock sizing -->
     <group
-        android:translateX="-23.2"
-        android:translateY="-19.4"
-        android:scaleX="0.64"
-        android:scaleY="0.64">
+        android:translateX="-44.0"
+        android:translateY="-33.0"
+        android:scaleX="0.80"
+        android:scaleY="0.80">
         <!-- 'M' letter -->
         <path
             android:fillColor="#FFFFFFFF"

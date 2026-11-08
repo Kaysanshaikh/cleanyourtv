@@ -5,10 +5,10 @@
     android:viewportHeight="70">
     <!-- Clean, high-definition solid Netflix 'N' ribbon with flat bottom, balanced sizing -->
     <group
-        android:translateX="45.78"
-        android:translateY="15.0"
-        android:scaleX="0.4444"
-        android:scaleY="0.4444">
+        android:translateX="42.22"
+        android:translateY="10.0"
+        android:scaleX="0.5556"
+        android:scaleY="0.5556">
         <!-- Left pillar with clean flat bottom at y=90 -->
         <path
             android:fillColor="#FFFFFFFF"

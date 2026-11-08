@@ -5,10 +5,10 @@
     android:viewportHeight="70">
     <!-- Official YouTube play button with evenOdd transparent cutout, balanced dock sizing -->
     <group
-        android:translateX="38.66"
-        android:translateY="20.0"
-        android:scaleX="0.1667"
-        android:scaleY="0.1667">
+        android:translateX="32.98"
+        android:translateY="16.0"
+        android:scaleX="0.2111"
+        android:scaleY="0.2111">
         <path
             android:fillColor="#FFFFFFFF"
             android:fillType="evenOdd"

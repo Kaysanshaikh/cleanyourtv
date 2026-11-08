@@ -5,10 +5,10 @@
     android:viewportHeight="70">
     <!-- Clean, bold Apple TV logo with prominent visible 'T' and 'V', balanced dock sizing -->
     <group
-        android:translateX="24.15"
-        android:translateY="13.65"
-        android:scaleX="0.826"
-        android:scaleY="0.826">
+        android:translateX="14.57"
+        android:translateY="7.94"
+        android:scaleX="1.0468"
+        android:scaleY="1.0468">
         <!-- Apple body -->
         <path
             android:fillColor="#FFFFFFFF"

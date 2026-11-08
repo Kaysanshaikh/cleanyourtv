@@ -5,10 +5,10 @@
     android:viewportHeight="70">
     <!-- Clean, high-definition 8-pointed sparkle star matching Hotstar, balanced dock sizing -->
     <group
-        android:translateX="35.5"
-        android:translateY="10.5"
-        android:scaleX="0.5106"
-        android:scaleY="0.5106">
+        android:translateX="31.41"
+        android:translateY="6.41"
+        android:scaleX="0.5957"
+        android:scaleY="0.5957">
         <path
             android:fillColor="#FFFFFFFF"
             android:pathData="M48,1 L51.5,39.5 L68,28 L56.5,44.5 L95,48 L56.5,51.5 L68,68 L51.5,56.5 L48,95 L44.5,56.5 L28,68 L39.5,51.5 L1,48 L39.5,44.5 L28,28 L44.5,39.5 Z" />
