@@ -4,3 +4,4 @@ im = Image.open(r"c:\Users\Kaysan Shaikh\Desktop\Claude\user_ref\WhatsApp Image 
 crop = im.crop((300, 700, 650, 1100))
 crop.save(r"c:\Users\Kaysan Shaikh\Desktop\Claude\cleanyourtv\tools\rf_body.jpg")
 print("Saved rf_body.jpg")
+

@@ -262,6 +262,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean reducedMotion;
     /** config.xml dock_row: the first row is a separate dock (band, parked low, top shelf) rather than plain grid. */
     private boolean dockRow;
+    private int rowsBelowDock;
     /** config single_row: every app in the dock's row, scrolling sideways, no grid below. */
     private boolean singleRow;
     /** The highlight springs past its target (config.xml, focus_overshoot); false goes straight there. */
@@ -479,6 +480,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         advancedEffects = cfg.animations && cfg.advancedEffects;
         reducedMotion = cfg.reducedMotion;
         dockRow = cfg.dockRow;
+        rowsBelowDock = cfg.rowsBelowDock;
         singleRow = cfg.singleRow;
         focusOvershoot = cfg.focusOvershoot;
         festival = cfg.festival;
@@ -720,8 +722,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (extraSections != null) {
             extraSections.removeAllViews();
             extraSections.addView(CustomSections.createAppsRow(this, mainScroll));
-            extraSections.addView(CustomSections.createFavouritesRow(this, mainScroll));
-            extraSections.addView(CustomSections.createMoodsRow(this, mainScroll));
         }
 
         // tvOS layout: push the dock row towards the bottom of the screen, leaving room for
@@ -2527,12 +2527,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             target = position - COLUMNS;
         } else {
             int lastRowStart = ((count - 1) / COLUMNS) * COLUMNS;
-            if (position >= lastRowStart) {
+            if (position >= lastRowStart || (dockRow && position < COLUMNS && rowsBelowDock == 0)) {
                 LinearLayout extraSections = findViewById(R.id.extraSectionsContainer);
                 if (extraSections != null && extraSections.getChildCount() > 0) {
                     View targetView = findFirstFocusable(extraSections);
                     if (targetView != null) {
                         hideHero();
+                        ScrollView mainScroll = findViewById(R.id.mainScroll);
+                        if (mainScroll != null) {
+                            mainScroll.post(() -> mainScroll.smoothScrollTo(0, extraSections.getTop()));
+                        }
                         targetView.requestFocus();
                         return true;
                     }

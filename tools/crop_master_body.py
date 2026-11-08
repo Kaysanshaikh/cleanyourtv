@@ -4,3 +4,4 @@ im = Image.open(r"c:\Users\Kaysan Shaikh\Desktop\Claude\user_ref\WhatsApp Image 
 crop = im.crop((100, 500, 550, 950))
 crop.save(r"c:\Users\Kaysan Shaikh\Desktop\Claude\cleanyourtv\tools\master_body.jpg")
 print("Saved master_body.jpg")
+

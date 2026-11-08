@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -27,7 +28,9 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public final class CustomSections {
@@ -257,7 +260,7 @@ public final class CustomSections {
         layout.setClipToPadding(false);
 
         TextView header = new TextView(activity);
-        header.setText("ALL APPS");
+        header.setText("MY APPS");
         header.setTextColor(0x8CFFFFFF);
         header.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         header.setLetterSpacing(0.12f);
@@ -277,31 +280,56 @@ public final class CustomSections {
         row.setClipChildren(false);
 
         PackageManager pm = activity.getPackageManager();
-        String[] popularPkgs = {
-            "com.android.vending",
-            "com.mxtech.videoplayer.television",
-            "com.sonyliv",
-            "com.jio.media.stb.ondemand.xiaomi",
-            "com.graymatrix.did",
-            "com.yablio.sendfilestotv",
-            "com.jio.web.androidtv",
-            "com.android.tv.settings"
-        };
+        String selfPkg = activity.getPackageName();
+        Map<String, ResolveInfo> appMap = new LinkedHashMap<>();
+
+        // Dynamically query real, installed, and enabled launcher activities
+        for (String cat : new String[]{Intent.CATEGORY_LEANBACK_LAUNCHER, Intent.CATEGORY_LAUNCHER}) {
+            Intent queryIntent = new Intent(Intent.ACTION_MAIN).addCategory(cat);
+            List<ResolveInfo> list = pm.queryIntentActivities(queryIntent, 0);
+            if (list != null) {
+                for (ResolveInfo ri : list) {
+                    if (ri == null || ri.activityInfo == null) continue;
+                    String pkg = ri.activityInfo.packageName;
+                    if (pkg == null || pkg.equals(selfPkg)) continue;
+
+                    // Verify application is explicitly enabled
+                    try {
+                        ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+                        if (!ai.enabled) continue;
+                    } catch (Exception ex) {
+                        continue;
+                    }
+
+                    // Verify valid launch intent exists
+                    Intent launchIntent = pm.getLaunchIntentForPackage(pkg);
+                    if (launchIntent == null) continue;
+
+                    // Exclude internal TV setup/glance/daemons
+                    if (pkg.contains("android.tvsetup") || pkg.contains("glance") || pkg.contains("updateservice") || pkg.contains("feedback") || pkg.contains("framework")) continue;
+
+                    if (!appMap.containsKey(pkg)) {
+                        appMap.put(pkg, ri);
+                    }
+                }
+            }
+        }
 
         boolean first = true;
-        for (String pkg : popularPkgs) {
+        for (Map.Entry<String, ResolveInfo> entry : appMap.entrySet()) {
+            final String pkg = entry.getKey();
+            ResolveInfo ri = entry.getValue();
+
             Drawable icon = null;
             String name = pkg;
             try {
-                ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
-                icon = pm.getApplicationBanner(ai);
-                if (icon == null) icon = pm.getApplicationIcon(ai);
-                name = pm.getApplicationLabel(ai).toString();
-            } catch (Exception e) {
-                if (!"com.android.vending".equals(pkg) && !"com.android.tv.settings".equals(pkg)) continue;
-                if ("com.android.vending".equals(pkg)) name = "Play Store";
-                if ("com.android.tv.settings".equals(pkg)) name = "Settings";
-            }
+                if (ri.activityInfo != null) {
+                    icon = ri.activityInfo.loadBanner(pm);
+                }
+                if (icon == null) icon = ri.loadIcon(pm);
+                CharSequence label = ri.loadLabel(pm);
+                if (label != null) name = label.toString();
+            } catch (Exception ignored) {}
 
             FrameLayout card = new FrameLayout(activity);
             if (first) {
@@ -311,7 +339,7 @@ public final class CustomSections {
             card.setFocusable(true);
             card.setClickable(true);
             card.setNextFocusUpId(R.id.grid);
-            card.setNextFocusDownId(10021); // First card of Section 6
+            card.setNextFocusDownId(View.NO_ID); // Final bottom section
 
             int cw = Math.round(172 * density);
             int ch = Math.round(74 * density);
@@ -475,7 +503,7 @@ public final class CustomSections {
             charCard.setFocusable(true);
             charCard.setClickable(true);
             charCard.setNextFocusUpId(10011); // To ALL APPS row
-            charCard.setNextFocusDownId(10031); // To Mood cards
+            charCard.setNextFocusDownId(View.NO_ID); // Final bottom section
 
             int cw = Math.round(112 * density);
             int ch = Math.round(42 * density);

@@ -13,3 +13,4 @@ print("Size:", im.size)
 crop = im.crop((0, 310, 739, 875))
 crop.save(r"c:\Users\Kaysan Shaikh\Desktop\Claude\cleanyourtv\tools\tv_exact_flash.jpg")
 print("Saved tv_exact_flash.jpg:", crop.size)
+

@@ -7,3 +7,4 @@ im_flash = Image.open(r"c:\Users\Kaysan Shaikh\Desktop\Claude\user_ref\WhatsApp 
 tv_crop = im_flash.crop((0, 300, 739, 1250))
 tv_crop.save(r"c:\Users\Kaysan Shaikh\Desktop\Claude\cleanyourtv\tools\tv_crop_flash.jpg")
 print("Saved tv_crop_flash.jpg")
+
